@@ -38,7 +38,7 @@ const init = (el) => {
   `,
 
     render(data) {
-      const a = data.n;
+      const n = data.n;
       if (this.el.children.length !== 0) this.el.empty();
       //jquery 会把字符串 html 变成 section 标签
       $(this.html.replace("{{n}}", n)).appendTo(this.el);
