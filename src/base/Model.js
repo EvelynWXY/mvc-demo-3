@@ -1,8 +1,15 @@
-class Model {
+import EventBus from "./EventBus";
+
+class Model extends EventBus {
   constructor(options) {
-    ["data", "create", "delete", "update", "get"].forEach((key) => {
-      this[key] = options[key];
+    super(); //调用EventBus#constructor(),即调用父类的初始化
+    const keys = [("data", "create", "delete", "update", "get")];
+    keys.forEach((key) => {
+      if (key in options) {
+        this[key] = options[key];
+      }
     });
+
     //this.data = options.data; //data 要传的时候才赋值到当前对象本身的data上，而不是赋值到原型链上
   }
   //函数在原型里

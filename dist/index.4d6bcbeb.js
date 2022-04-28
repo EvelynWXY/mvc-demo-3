@@ -528,8 +528,8 @@ var _app2Js = require("./app2.js");
 var _app2JsDefault = parcelHelpers.interopDefault(_app2Js);
 var _app3Js = require("./app3.js");
 var _app4Js = require("./app4.js");
-_app1JsDefault.default.init("#app1");
-_app2JsDefault.default.init("#app2");
+_app1JsDefault.default("#app1");
+_app2JsDefault.default("#app2");
 
 },{"./reset.css":"8XPx9","./global.css":"11axS","./app1.js":"gMhIk","./app2.js":"alK4Z","./app3.js":"264pe","./app4.js":"6ZENx","@parcel/transformer-js/src/esmodule-helpers.js":"daEAq"}],"8XPx9":[function() {},{}],"11axS":[function() {},{}],"gMhIk":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
@@ -537,27 +537,30 @@ parcelHelpers.defineInteropFlag(exports);
 var _app1Css = require("./app1.css");
 var _jquery = require("jquery");
 var _jqueryDefault = parcelHelpers.interopDefault(_jquery);
-var _modelJs = require("./base/Model.js");
-var _modelJsDefault = parcelHelpers.interopDefault(_modelJs);
-const eventBus = _jqueryDefault.default({
-    window
-});
+var _model = require("./base/Model");
+var _modelDefault = parcelHelpers.interopDefault(_model);
+var _view = require("./base/View");
+var _viewDefault = parcelHelpers.interopDefault(_view);
+var _eventBus = require("./base/EventBus");
+var _eventBusDefault = parcelHelpers.interopDefault(_eventBus);
 //数据相关都放到 m
-const m = new _modelJsDefault.default({
+const m = new _modelDefault.default({
     data: {
         //第一次要初始化 n，使用localStorage get、set实现每次刷新页面数据也不会丢失
-        n: parseInt(localStorage.getItem("n"))
+        n: parseFloat(localStorage.getItem("n"))
     },
     update: function(data) {
         Object.assign(m.data, data);
-        eventBus.trigger("m:updated"); //触发事件
+        m.trigger("m:updated"); //触发事件
         localStorage.setItem("n", m.data.n);
     }
 });
-//其他都是 c //根据 vue.js 认为是前端的库应该是合并到 v 里
-const view = {
-    el: null,
-    html: `
+const init = (el)=>{
+    //其他都是 c //根据 vue.js 认为是前端的库应该是合并到 v 里
+    new _viewDefault.default({
+        el: el,
+        data: m.data,
+        html: `
         <div>
           <div class="output">
             <span id="number">{{n}}</span>
@@ -570,114 +573,43 @@ const view = {
           </div>
       </div>
   `,
-    init (container) {
-        view.el = _jqueryDefault.default(container);
-        view.render(m.data.n);
-        view.autoBindEvents();
-        view.autoBindEvents();
-        eventBus.on("m:updated", ()=>{
-            view.render(m.data.n);
-        });
-    },
-    render (n) {
-        if (view.el.children.length !== 0) view.el.empty();
-        //jquery 会把字符串 html 变成 section 标签
-        _jqueryDefault.default(view.html.replace("{{n}}", n)).appendTo(view.el);
-    },
-    events: {
-        "click #add1": "add",
-        "click #minus1": "minus",
-        "click #mul2": "mul",
-        "click #divide2": "div"
-    },
-    add () {
-        m.update({
-            n: m.data.n + 1
-        });
-    },
-    minus () {
-        m.update({
-            n: m.data.n - 1
-        });
-    },
-    mul () {
-        m.update({
-            n: m.data.n * 2
-        });
-    },
-    div () {
-        m.update({
-            n: m.data.n / 2
-        });
-    },
-    autoBindEvents () {
-        //绑定鼠标事件，绑定的是 section 不是 button，事件委托，绑定在最外面的那个元素上
-        for(let key in view.events){
-            const value = view[view.events[key]];
-            const spaceIndex = key.indexOf(" ");
-            const part1 = key.slice(0, spaceIndex);
-            const part2 = key.slice(spaceIndex + 1);
-            view.el.on(part1, part2, value);
+        render (data) {
+            const a = data.n;
+            if (this.el.children.length !== 0) this.el.empty();
+            //jquery 会把字符串 html 变成 section 标签
+            _jqueryDefault.default(this.html.replace("{{n}}", n)).appendTo(this.el);
+        },
+        events: {
+            "click #add1": "add",
+            "click #minus1": "minus",
+            "click #mul2": "mul",
+            "click #divide2": "div"
+        },
+        add () {
+            m.update({
+                n: m.data.n + 1
+            });
+        },
+        minus () {
+            m.update({
+                n: m.data.n - 1
+            });
+        },
+        mul () {
+            m.update({
+                n: m.data.n * 2
+            });
+        },
+        div () {
+            m.update({
+                n: m.data.n / 2
+            });
         }
-    }
+    });
 };
-exports.default = view; // //其他都 c
- // const c1 = {
- //   v: null,
- //   initV() {
- //     //视图相关都放到 v
- //     c.v = new View({
- //       el: c.container, //表示容器，代替之前的 container
- //       html: `
- //   `,
- //       render(n) {
- //         if (c.v.el.children.length !== 0) c.v.el.empty();
- //         //jquery 会把字符串 html 变成 section 标签
- //         $(c.v.html.replace("{{n}}", n)).appendTo(c.v.el);
- //       },
- //     });
- //   },
- //   init(container) {
- //     c.container = container;
- //     c.initV();
- //     c.v.render(m.data.n); //第一次 view = render(data)
- //     c.autoBindEvents();
- //     eventBus.on("m:updated", () => {
- //       c.v.render(m.data.n);
- //     });
- //   },
- //   events: {
- //     "click #add1": "add",
- //     "click #minus1": "minus",
- //     "click #mul2": "mul",
- //     "click #divide2": "div",
- //   },
- //   add() {
- //     m.update({ n: m.data.n + 1 });
- //   },
- //   minus() {
- //     m.update({ n: m.data.n - 1 });
- //   },
- //   mul() {
- //     m.update({ n: m.data.n * 2 });
- //   },
- //   div() {
- //     m.update({ n: m.data.n / 2 });
- //   },
- //   autoBindEvents() {
- //     //绑定鼠标事件，绑定的是 section 不是 button，事件委托，绑定在最外面的那个元素上
- //     for (let key in c.events) {
- //       const value = c[c.events[key]];
- //       const spaceIndex = key.indexOf(" ");
- //       const part1 = key.slice(0, spaceIndex);
- //       const part2 = key.slice(spaceIndex + 1);
- //       c.v.el.on(part1, part2, value);
- //     }
- //   },
- // };
- // export default c;
+exports.default = init;
 
-},{"jquery":"hgMhh","@parcel/transformer-js/src/esmodule-helpers.js":"daEAq","./app1.css":"7FkZd","./base/Model.js":"hO9cm"}],"hgMhh":[function(require,module,exports) {
+},{"jquery":"hgMhh","@parcel/transformer-js/src/esmodule-helpers.js":"daEAq","./app1.css":"7FkZd","./base/View":"heZL3","./base/EventBus":"g3Ns6","./base/Model":"hO9cm"}],"hgMhh":[function(require,module,exports) {
 /*!
  * jQuery JavaScript Library v3.6.0
  * https://jquery.com/
@@ -7519,19 +7451,73 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}],"7FkZd":[function() {},{}],"hO9cm":[function(require,module,exports) {
+},{}],"7FkZd":[function() {},{}],"heZL3":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
-class Model {
+var _jquery = require("jquery");
+var _jqueryDefault = parcelHelpers.interopDefault(_jquery);
+var _eventBus = require("./EventBus");
+var _eventBusDefault = parcelHelpers.interopDefault(_eventBus);
+class View extends _eventBusDefault.default {
+    //初始化
+    //constructor({ el, html, render, data, eventBus, events }) {
     constructor(options){
-        [
-            "data",
-            "create",
-            "delete",
-            "update",
+        super(); //调用EventBus#constructor(),即调用父类的初始化
+        Object.assign(this, options); //options 有什么就都放在 this 上
+        this.el = _jqueryDefault.default(this.el); //覆盖el = $(el)
+        this.render(this.data);
+        this.autoBindEvents();
+        this.on("m:updated", ()=>{
+            this.render(this.data);
+        });
+    }
+    autoBindEvents() {
+        //绑定鼠标事件，绑定的是 section 不是 button，事件委托，绑定在最外面的那个元素上
+        for(let key in this.events){
+            const value = this[this.events[key]];
+            const spaceIndex = key.indexOf(" ");
+            const part1 = key.slice(0, spaceIndex);
+            const part2 = key.slice(spaceIndex + 1);
+            this.el.on(part1, part2, value);
+        }
+    }
+}
+exports.default = View;
+
+},{"jquery":"hgMhh","@parcel/transformer-js/src/esmodule-helpers.js":"daEAq","./EventBus":"g3Ns6"}],"g3Ns6":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _jquery = require("jquery");
+var _jqueryDefault = parcelHelpers.interopDefault(_jquery);
+class EventBus {
+    constructor(){
+        this._eventBus = _jqueryDefault.default(window);
+    }
+    on(eventName, fn) {
+        return this._eventBus.on(eventName, fn);
+    }
+    trigger(eventName, data) {
+        return this._eventBus.trigger(eventName, data);
+    }
+    off(eventName, fn) {
+        return this._eventBus.off(eventName, fn);
+    }
+}
+exports.default = EventBus;
+
+},{"jquery":"hgMhh","@parcel/transformer-js/src/esmodule-helpers.js":"daEAq"}],"hO9cm":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+var _eventBus = require("./EventBus");
+var _eventBusDefault = parcelHelpers.interopDefault(_eventBus);
+class Model extends _eventBusDefault.default {
+    constructor(options){
+        super(); //调用EventBus#constructor(),即调用父类的初始化
+        const keys = [
             "get"
-        ].forEach((key)=>{
-            this[key] = options[key];
+        ];
+        keys.forEach((key)=>{
+            if (key in options) this[key] = options[key];
         });
     //this.data = options.data; //data 要传的时候才赋值到当前对象本身的data上，而不是赋值到原型链上
     }
@@ -7552,7 +7538,7 @@ class Model {
 }
 exports.default = Model;
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"daEAq"}],"alK4Z":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"daEAq","./EventBus":"g3Ns6"}],"alK4Z":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _app2Css = require("./app2.css");
@@ -7560,9 +7546,11 @@ var _jquery = require("jquery");
 var _jqueryDefault = parcelHelpers.interopDefault(_jquery);
 var _model = require("./base/Model");
 var _modelDefault = parcelHelpers.interopDefault(_model);
-const eventBus = _jqueryDefault.default({
-    window
-});
+var _view = require("./base/View");
+var _viewDefault = parcelHelpers.interopDefault(_view);
+var _eventBus = require("./base/EventBus");
+var _eventBusDefault = parcelHelpers.interopDefault(_eventBus);
+const eventBus = new _eventBusDefault.default();
 const localKey = "app2.index"; //本地存下的值
 //数据相关都放到 m
 const m = new _modelDefault.default({
@@ -7577,10 +7565,13 @@ const m = new _modelDefault.default({
     }
 });
 //其他都 c
-const view = {
-    el: null,
-    html: (index)=>{
-        return `
+const init = (el)=>{
+    new _viewDefault.default({
+        el: el,
+        data: m.data,
+        eventBus: eventBus,
+        html: (index)=>{
+            return `
               <div>
                   <ol class="tab-bar">
                     <li class = "${index === 0 ? "selected" : ""}" data-index = "0"<span>11111</span></li>
@@ -7591,44 +7582,27 @@ const view = {
                     <li class = "${index === 1 ? "active" : ""}">内容2</li>
                   </ol>
               </div>`;
-    },
-    render (index) {
-        if (view.el.children.length !== 0) view.el.empty();
-        //jquery 会把字符串 html 变成 section 标签
-        _jqueryDefault.default(view.html(index)).appendTo(view.el);
-    },
-    init (container) {
-        view.el = _jqueryDefault.default(container);
-        view.render(m.data.index); //第一次 view = render(data)
-        view.autoBindEvents();
-        eventBus.on("m:updated", ()=>{
-            view.render(m.data.index);
-        });
-    },
-    events: {
-        "click .tab-bar li": "x"
-    },
-    x (e) {
-        const index = parseInt(e.currentTarget.dataset.index);
-        m.update({
-            index: index
-        });
-        console.log("x");
-    },
-    autoBindEvents () {
-        //绑定鼠标事件，绑定的是 section 不是 button，事件委托，绑定在最外面的那个元素上
-        for(let key in view.events){
-            const value = view[view.events[key]];
-            const spaceIndex = key.indexOf(" ");
-            const part1 = key.slice(0, spaceIndex);
-            const part2 = key.slice(spaceIndex + 1);
-            view.el.on(part1, part2, value);
+        },
+        render (data) {
+            const index = data.index;
+            if (this.el.children.length !== 0) this.el.empty();
+            //jquery 会把字符串 html 变成 section 标签
+            _jqueryDefault.default(this.html(index)).appendTo(this.el);
+        },
+        events: {
+            "click .tab-bar li": "x"
+        },
+        x (e) {
+            const index = parseInt(e.currentTarget.dataset.index);
+            m.update({
+                index: index
+            });
         }
-    }
+    });
 };
-exports.default = view;
+exports.default = init;
 
-},{"jquery":"hgMhh","@parcel/transformer-js/src/esmodule-helpers.js":"daEAq","./app2.css":"8RnuD","./base/Model":"hO9cm"}],"8RnuD":[function() {},{}],"264pe":[function(require,module,exports) {
+},{"jquery":"hgMhh","@parcel/transformer-js/src/esmodule-helpers.js":"daEAq","./app2.css":"8RnuD","./base/Model":"hO9cm","./base/View":"heZL3","./base/EventBus":"g3Ns6"}],"8RnuD":[function() {},{}],"264pe":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 var _app3Css = require("./app3.css");
 var _jquery = require("jquery");
