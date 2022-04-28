@@ -3,7 +3,7 @@ import EventBus from "./EventBus";
 class Model extends EventBus {
   constructor(options) {
     super(); //调用EventBus#constructor(),即调用父类的初始化
-    const keys = [("data", "create", "delete", "update", "get")];
+    const keys = ["data", "create", "delete", "update", "get"];
     keys.forEach((key) => {
       if (key in options) {
         this[key] = options[key];
