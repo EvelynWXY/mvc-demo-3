@@ -8,7 +8,7 @@ import EventBus from "./base/EventBus";
 const m = new Model({
   data: {
     //第一次要初始化 n，使用localStorage get、set实现每次刷新页面数据也不会丢失
-    n: parseFloat(localStorage.getItem("n")), //初始化数据,localStorage 只能获取到字符串
+    n: parseFloat(localStorage.getItem("n")) || 0, //初始化数据,localStorage 只能获取到字符串
   },
 
   update: function (data) {
